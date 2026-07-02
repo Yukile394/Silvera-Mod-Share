@@ -18,6 +18,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.silvera.modshare.ui.screens.HomeScreen
 import com.silvera.modshare.ui.screens.ScanReportScreen
 import com.silvera.modshare.ui.theme.SilveraModShareTheme
