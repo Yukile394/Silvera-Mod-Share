@@ -8,7 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.lazy.animateItemPlacement
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun SilveraApp(viewModel: ModViewModel) {
     val mods by viewModel.mods.collectAsState()
@@ -111,8 +111,8 @@ fun SilveraApp(viewModel: ModViewModel) {
                     items(mods, key = { it.id }) { mod ->
                         ModCard(
                             mod = mod,
-                            modifier = Modifier.animateItemPlacement(
-                                animationSpec = tween(350)
+                            modifier = Modifier.animateItem(
+                                placementSpec = tween(350)
                             ),
                             onDelete = { viewModel.deleteMod(mod) }
                         )
