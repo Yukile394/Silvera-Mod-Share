@@ -7,7 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateItemPlacement
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -111,8 +110,8 @@ fun SilveraApp(viewModel: ModViewModel) {
                     items(mods, key = { it.id }) { mod ->
                         ModCard(
                             mod = mod,
-                            modifier = Modifier.animateItemPlacement(
-                                animationSpec = tween(350)
+                            modifier = Modifier.animateItem(
+                                placementSpec = tween(350)
                             ),
                             onDelete = { viewModel.deleteMod(mod) }
                         )
