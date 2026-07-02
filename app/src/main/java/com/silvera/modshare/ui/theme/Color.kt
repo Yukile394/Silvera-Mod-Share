@@ -11,3 +11,7 @@ val SilveraOnBackground = Color(0xFFECECF4)
 val SilveraOnSurfaceMuted = Color(0xFFA0A0B2)
 val SilveraAccent = Color(0xFF00E5A0)
 val SilveraError = Color(0xFFFF5C5C)
+
+val RiskCritical = Color(0xFFFF4757)
+val RiskHigh = Color(0xFFFF7A45)
+val RiskMedium = Color(0xFFFFC107)
