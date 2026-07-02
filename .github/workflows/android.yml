@@ -1,0 +1,48 @@
+name: Android Build
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Debug ve Release APK Derle
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Kodları çek
+        uses: actions/checkout@v4
+
+      - name: JDK 17 kur
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Gradle kur
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: gradlew çalıştırılabilir yap (varsa)
+        run: |
+          if [ -f "./gradlew" ]; then chmod +x ./gradlew; fi
+
+      - name: Debug APK derle
+        run: gradle assembleDebug --no-daemon
+
+      - name: Release APK derle
+        run: gradle assembleRelease --no-daemon
+
+      - name: Debug APK yükle (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: silvera-modshare-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+
+      - name: Release APK yükle (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: silvera-modshare-release-apk
+          path: app/build/outputs/apk/release/*.apk
