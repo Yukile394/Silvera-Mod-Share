@@ -69,6 +69,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun SilveraApp(viewModel: ScanViewModel) {
     val context = LocalContext.current
