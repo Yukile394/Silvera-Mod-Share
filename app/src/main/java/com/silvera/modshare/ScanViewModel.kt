@@ -22,14 +22,26 @@ class ScanViewModel(application: Application) : AndroidViewModel(application) {
     private val _lastScanTime = MutableStateFlow<Long?>(null)
     val lastScanTime: StateFlow<Long?> = _lastScanTime
 
+    private val _scanError = MutableStateFlow<String?>(null)
+    val scanError: StateFlow<String?> = _scanError
+
     fun startScan() {
+        // Guard against double-taps, but never let a crashed/stuck scan block future scans forever.
         if (_isScanning.value) return
         viewModelScope.launch {
             _isScanning.value = true
-            val result = withContext(Dispatchers.IO) { ScanEngine.runFullScan(getApplication()) }
-            _report.value = result
-            _lastScanTime.value = result.timestamp
-            _isScanning.value = false
+            _scanError.value = null
+            try {
+                val result = withContext(Dispatchers.IO) { ScanEngine.runFullScan(getApplication()) }
+                _report.value = result
+                _lastScanTime.value = result.timestamp
+            } catch (e: Exception) {
+                // Önceden burada bir hata "Taranıyor..." ekranında sonsuza kadar takılı kalmaya
+                // sebep oluyordu (isScanning hiç false olmuyordu). Artık her durumda kapanıyor.
+                _scanError.value = e.message ?: "Tarama sırasında bir hata oluştu"
+            } finally {
+                _isScanning.value = false
+            }
         }
     }
 
