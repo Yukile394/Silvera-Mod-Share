@@ -1,5 +1,6 @@
 package com.silvera.modshare.ui.screens
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -47,6 +49,8 @@ fun ScanReportScreen(
         null -> 0f
     }
 
+    val context = LocalContext.current
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(20.dp),
@@ -60,7 +64,9 @@ fun ScanReportScreen(
             ) {
                 IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, contentDescription = "Geri") }
                 Text("Tarama Raporu", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                IconButton(onClick = { }) { Icon(Icons.Filled.Share, contentDescription = "Paylaş") }
+                IconButton(onClick = { shareReport(context, report) }) {
+                    Icon(Icons.Filled.Share, contentDescription = "Paylaş")
+                }
             }
         }
 
@@ -294,4 +300,31 @@ private fun formatDate(millis: Long): String = SimpleDateFormat("d MMMM yyyy HH:
 private fun formatDuration(ms: Long): String {
     val totalSeconds = ms / 1000
     return "${totalSeconds / 60} dk ${totalSeconds % 60} sn"
+}
+
+fun shareReport(context: android.content.Context, report: ScanReport) {
+    val text = buildString {
+        appendLine("🛡 Silvera Hile Koruma – Tarama Raporu")
+        appendLine("Tarih: ${formatDate(report.timestamp)}")
+        appendLine("Taranan dosya: ${report.scannedFileCount}")
+        appendLine("Taranan mod: ${report.scannedModCount}")
+        appendLine("Tespit edilen tehdit: ${report.threats.size}")
+        if (report.threats.isNotEmpty()) {
+            appendLine()
+            appendLine("Tehditler:")
+            report.threats.forEach { t ->
+                appendLine("• ${t.name} (${t.risk.label}) – ${t.typeLabel}")
+            }
+        } else {
+            appendLine("Tehdit bulunamadı, cihaz temiz.")
+        }
+    }
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_SUBJECT, "Silvera Tarama Raporu")
+        putExtra(Intent.EXTRA_TEXT, text)
+    }
+    runCatching {
+        context.startActivity(Intent.createChooser(intent, "Raporu paylaş"))
+    }
 }
