@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.silvera.modshare.scan.ScanReport
+import com.silvera.modshare.ui.components.TriggerIcon
 import com.silvera.modshare.ui.theme.RiskCritical
 import com.silvera.modshare.ui.theme.SilveraAccent
 import com.silvera.modshare.ui.theme.SilveraPurple
@@ -27,7 +28,8 @@ fun HomeScreen(
     report: ScanReport?,
     lastScanTime: Long?,
     isScanning: Boolean,
-    onStartScan: () -> Unit
+    onStartScan: () -> Unit,
+    onOpenSettings: () -> Unit = {}
 ) {
     val threatCount = report?.threats?.size ?: 0
     val isSafe = report == null || threatCount == 0
@@ -41,12 +43,12 @@ fun HomeScreen(
         ) {
             Box(
                 modifier = Modifier.size(40.dp).clip(RoundedCornerShape(12.dp))
-                    .background(SilveraPurple.copy(alpha = 0.2f)),
+                    .background(Brush.linearGradient(listOf(SilveraPurple, SilveraAccent))),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Filled.Shield, contentDescription = null, tint = SilveraPurple)
+                Icon(Icons.Filled.Shield, contentDescription = null, tint = Color.White)
             }
-            IconButton(onClick = { }) {
+            IconButton(onClick = onOpenSettings) {
                 Icon(Icons.Filled.Settings, contentDescription = "Ayarlar")
             }
         }
@@ -91,21 +93,7 @@ fun HomeScreen(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .clip(RoundedCornerShape(18.dp))
-                            .background(Brush.verticalGradient(listOf(Color(0xFF7CC576), Color(0xFF5A8A3A))))
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(20.dp)
-                                .align(Alignment.TopCenter)
-                                .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp))
-                                .background(Color(0xFF6FBF5A))
-                        )
-                    }
+                    TriggerIcon(size = 72.dp)
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
