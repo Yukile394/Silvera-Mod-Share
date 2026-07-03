@@ -36,21 +36,29 @@ object ScanEngine {
         val visited = mutableSetOf<String>()
 
         SCAN_DIRS.forEach { rel ->
-            val dir = File(root, rel)
-            if (dir.exists() && dir.isDirectory) {
-                scanDirectory(dir, visited).forEach { file ->
-                    scannedFiles++
-                    val lower = file.name.lowercase()
-                    if (lower.endsWith(".jar") || lower.endsWith(".zip") || lower.endsWith(".apk")) {
-                        scannedMods++
+            try {
+                val dir = File(root, rel)
+                if (dir.exists() && dir.isDirectory) {
+                    scanDirectory(dir, visited).forEach { file ->
+                        try {
+                            scannedFiles++
+                            val lower = file.name.lowercase()
+                            if (lower.endsWith(".jar") || lower.endsWith(".zip") || lower.endsWith(".apk")) {
+                                scannedMods++
+                            }
+                            matchThreat(file)?.let { threats.add(it) }
+                        } catch (e: Exception) {
+                            // Bozuk/erişilemeyen tek bir dosya artık taramanın tamamını durdurmuyor.
+                        }
                     }
-                    matchThreat(file)?.let { threats.add(it) }
                 }
+            } catch (e: Exception) {
+                // İzin geri alınmış veya klasöre erişilemiyor olabilir; taramaya devam et.
             }
         }
 
-        detectZArchiver(context)?.let { threats.add(it) }
-        threats.addAll(scanBrowserHistory(context))
+        runCatching { detectZArchiver(context)?.let { threats.add(it) } }
+        runCatching { threats.addAll(scanBrowserHistory(context)) }
 
         val distinct = threats.distinctBy { it.name + it.path }
         return ScanReport(
@@ -65,11 +73,15 @@ object ScanEngine {
     private fun scanDirectory(dir: File, visited: MutableSet<String>, depth: Int = 0): List<File> {
         if (depth > 6) return emptyList()
         val result = mutableListOf<File>()
-        val children = dir.listFiles() ?: return result
+        val children = runCatching { dir.listFiles() }.getOrNull() ?: return result
         for (child in children) {
-            if (!visited.add(child.absolutePath)) continue
-            if (child.isDirectory) result.addAll(scanDirectory(child, visited, depth + 1))
-            else result.add(child)
+            try {
+                if (!visited.add(child.absolutePath)) continue
+                if (child.isDirectory) result.addAll(scanDirectory(child, visited, depth + 1))
+                else result.add(child)
+            } catch (e: Exception) {
+                // Tek bir alt klasör/kısayol sorunlu olsa bile tarama kesilmesin.
+            }
         }
         return result
     }
